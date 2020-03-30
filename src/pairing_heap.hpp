@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <utility>
+#include <vector>
 
 namespace sd {
 
@@ -22,7 +23,7 @@ struct heap_node
 public:
     std::shared_ptr<heap_node> left_child{ nullptr };
     std::shared_ptr<heap_node> next_sibling{ nullptr };
-    std::shared_ptr<heap_node> prev_sibling{ nullptr };
+    heap_node* prev_sibling{ nullptr };
     Key value{};
 
     heap_node() noexcept = default;
@@ -49,13 +50,29 @@ public:
         }
 
         node->next_sibling = left_child;
-        left_child->prev_sibling = node;
+        left_child->prev_sibling = node.get();
         left_child = node;
     }
 };
 
+template<typename Key>
+auto add_as_child(ptr<Key> parent, ptr<Key> child) -> void
+{
+    if(parent->left_child == nullptr) {
+        parent->left_child = child;
+        child->prev_sibling = parent.get();
+        return;
+    }
+
+    child->next_sibling = parent->left_child;
+    // parent->prev_sibling = child;
+    parent->left_child = child;
+    child->prev_sibling = parent.get();
+    child->next_sibling->prev_sibling = child.get();
+}
+
 ///
-/// \brief AKA compare-link, melding.
+/// \brief AKA compare-link, meld.
 ///
 template<typename Key>
 [[nodiscard]] auto merge(ptr<Key> a, ptr<Key> b) -> ptr<Key>
@@ -68,11 +85,13 @@ template<typename Key>
     }
 
     if(a->value < b->value) {
-        a->add_as_child(b);
+        // a->add_as_child(b);
+        add_as_child(a, b);
         return a;
     }
 
-    b->add_as_child(a);
+    // b->add_as_child(a);
+    add_as_child(b, a);
     return b;
 }
 
@@ -126,6 +145,45 @@ private:
         this->traverse(node->next_sibling.get());
     }
 
+    [[nodiscard]] auto find_node(heap_node_t const* const root,
+                                 Key const value) const -> heap_node_t const*
+    {
+        if(root == nullptr) {
+            return nullptr;
+        }
+        if(root->value == value) {
+            return root;
+        }
+
+        auto find_left = find_node(root->left_child.get(), value);
+
+        if(find_left != nullptr) {
+            return find_left;
+        }
+
+        return find_node(root->next_sibling.get(), value);
+    }
+
+    [[nodiscard]] auto find_node(std::shared_ptr<heap_node_t> root,
+                                 Key const value)
+        -> std::shared_ptr<heap_node_t>
+    {
+        if(root == nullptr) {
+            return nullptr;
+        }
+        if(root->value == value) {
+            return root;
+        }
+
+        auto find_left = find_node(root->left_child, value);
+
+        if(find_left != nullptr) {
+            return find_left;
+        }
+
+        return find_node(root->next_sibling, value);
+    }
+
 public:
     pairing_heap() noexcept = default;
     pairing_heap(pairing_heap const&) = delete;
@@ -168,12 +226,103 @@ public:
         --m_size;
     }
 
+    [[nodiscard]] auto find2(Key const value) const -> heap_node_t const*
+    {
+        return this->find_node(m_root.get(), value);
+    }
+
+    [[nodiscard]] auto find(Key const value) -> std::shared_ptr<heap_node_t>
+    {
+        return this->find_node(m_root, value);
+    }
+
+    auto remove(Key const value) -> int
+    {
+        int count{ 0 };
+
+        if(m_root == nullptr) {
+            return count;
+        }
+
+        for(;; ++count) {
+            if(m_root->value == value) {
+                this->delete_min();
+                return count;
+            }
+
+            auto node = this->find(value);
+
+            if(node == nullptr) {
+                return count;
+            }
+
+            // because they are shared pointers, nodes will not be deleted if
+            // they have a sibling or a left child.
+            // This is useful for not checking whether node is a left child
+            // or a sibling.
+            node->prev_sibling->next_sibling = nullptr;
+            node->prev_sibling->left_child = nullptr;
+            node->prev_sibling = nullptr;
+
+            m_root = impl::merge(
+                m_root,
+                impl::merge(impl::two_pass_merge(node->left_child),
+                            impl::two_pass_merge(node->next_sibling)));
+            --m_size;
+        }
+
+        return count;
+    }
+
+    ///
+    /// \brief Deletes all appearances of value, replaces them with a node
+    ///        with value=new_value.
+    ///
+    auto modify(Key const value, Key const new_value) -> void
+    {
+        this->remove(value);
+        this->insert(new_value);
+    }
+
+    ///
+    /// \brief Performs node->value--;
+    ///
+    auto decrease_key(std::shared_ptr<heap_node_t> node) -> void
+    {
+        --node->value;
+        if(node->next_sibling == nullptr || node->prev_sibling == nullptr) {
+            return;
+        }
+        if(node->value >= node->prev_sibling->value) {
+            return;
+        }
+
+        node->prev_sibling->left_child = nullptr;
+        node->prev_sibling->next_sibling = nullptr;
+        node->prev_sibling = nullptr;
+
+        m_root = impl::merge(m_root, node);
+    }
+
+    [[nodiscard]] auto root() -> std::shared_ptr<heap_node_t>
+    {
+        return m_root;
+    }
+
     auto traverse() const -> void
     {
         this->traverse(m_root.get());
         std::cout << std::endl;
     }
 };
+
+template<typename Key>
+auto build_heap(pairing_heap<Key>& heap, std::vector<int> const& values) -> void
+{
+    for(int const num : values) {
+        heap.insert(num);
+    }
+}
 
 } // namespace sd
 
