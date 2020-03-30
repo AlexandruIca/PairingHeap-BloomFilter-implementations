@@ -220,10 +220,18 @@ public:
         m_size += other.size();
     }
 
-    auto delete_min() -> void
+    auto delete_min() -> int
     {
-        m_root = impl::two_pass_merge(m_root->left_child);
-        --m_size;
+        Key const min = m_root->value;
+        int count{ 0 };
+
+        while(min == m_root->value) {
+            m_root = impl::two_pass_merge(m_root->left_child);
+            --m_size;
+            ++count;
+        }
+
+        return count;
     }
 
     [[nodiscard]] auto find2(Key const value) const -> heap_node_t const*
@@ -246,8 +254,7 @@ public:
 
         for(;; ++count) {
             if(m_root->value == value) {
-                this->delete_min();
-                return count;
+                return this->delete_min();
             }
 
             auto node = this->find(value);
