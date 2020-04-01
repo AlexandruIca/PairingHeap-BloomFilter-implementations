@@ -23,6 +23,11 @@ struct heap_node
 public:
     std::shared_ptr<heap_node> left_child{ nullptr };
     std::shared_ptr<heap_node> next_sibling{ nullptr };
+    ///
+    /// The prev_sibling is a pointer to the previous node that is on the same
+    /// level as *this or the parent if *this is already the leftmost node. This
+    /// helps me implement remove operations easier.
+    ///
     heap_node* prev_sibling{ nullptr };
     Key value{};
 
@@ -42,7 +47,8 @@ public:
     ///
     /// \brief Makes the \ref left_child equal to node.
     ///
-    auto add_as_child(std::shared_ptr<heap_node> node) -> void
+    [[deprecated("Doesn't handle prev_sibling correctly")]] auto
+    add_as_child(std::shared_ptr<heap_node> node) -> void
     {
         if(left_child == nullptr) {
             left_child = node;
@@ -55,6 +61,9 @@ public:
     }
 };
 
+///
+/// \brief Makes parent->left_child equal to child.
+///
 template<typename Key>
 auto add_as_child(ptr<Key> parent, ptr<Key> child) -> void
 {
@@ -73,6 +82,8 @@ auto add_as_child(ptr<Key> parent, ptr<Key> child) -> void
 
 ///
 /// \brief AKA compare-link, meld.
+///
+/// Complexity: O(1)
 ///
 template<typename Key>
 [[nodiscard]] auto merge(ptr<Key> a, ptr<Key> b) -> ptr<Key>
@@ -101,6 +112,9 @@ template<typename Key>
     return merge(node, std::make_shared<heap_node<Key>>(value));
 }
 
+///
+/// Complexity: hard to compute, probably around O(log n)
+///
 template<typename Key>
 [[nodiscard]] auto two_pass_merge(ptr<Key> node) -> ptr<Key>
 {
@@ -133,6 +147,9 @@ private:
     std::shared_ptr<heap_node_t> m_root{ nullptr };
     int m_size{ 0 };
 
+    ///
+    /// \brief Helper to print the elements of the heap.
+    ///
     auto traverse(heap_node_t const* const node) const noexcept -> void
     {
         if(node == nullptr) {
@@ -164,6 +181,9 @@ private:
         return find_node(root->next_sibling.get(), value);
     }
 
+    ///
+    /// \brief Useful for \ref remove.
+    ///
     [[nodiscard]] auto find_node(std::shared_ptr<heap_node_t> root,
                                  Key const value)
         -> std::shared_ptr<heap_node_t>
@@ -203,23 +223,43 @@ public:
         return m_size;
     }
 
+    ///
+    /// \brief Returns the root element.
+    ///
+    /// Complexity: O(1)
+    ///
     [[nodiscard]] inline auto get_min() const -> Key
     {
         return m_root->value;
     }
 
+    ///
+    /// \brief Adds \p value to heap.
+    ///
+    /// Complexity: O(1)
+    ///
     auto insert(Key const value) -> void
     {
         m_root = impl::insert(m_root, value);
         ++m_size;
     }
 
+    ///
+    /// \brief Merge with another pairing heap.
+    ///
+    /// Complexity: O(1)
+    ///
     auto join(pairing_heap& other) -> void
     {
         m_root = impl::merge(m_root, other.m_root);
         m_size += other.size();
     }
 
+    ///
+    /// \brief Deletes the root element.
+    ///
+    /// Complexity: same as \ref two_pass_merge * number of minimums.
+    ///
     auto delete_min() -> int
     {
         Key const min = m_root->value;
@@ -239,11 +279,20 @@ public:
         return this->find_node(m_root.get(), value);
     }
 
+    ///
+    /// \brief Used in \ref remove.
+    ///
     [[nodiscard]] auto find(Key const value) -> std::shared_ptr<heap_node_t>
     {
         return this->find_node(m_root, value);
     }
 
+    ///
+    /// \brief Removes all elements with values = \p value.
+    ///
+    /// Complexity: ~\ref two_pass_merge * number of elements with value \p
+    /// value
+    ///
     auto remove(Key const value) -> int
     {
         int count{ 0 };
@@ -285,6 +334,8 @@ public:
     /// \brief Deletes all appearances of value, replaces them with a node
     ///        with value=new_value.
     ///
+    /// Complexity: same as \ref remove.
+    ///
     auto modify(Key const value, Key const new_value) -> void
     {
         this->remove(value);
@@ -293,6 +344,9 @@ public:
 
     ///
     /// \brief Performs node->value--;
+    ///
+    /// I doubt I've implemented this correctly, I couldn't really find info
+    /// on the internet about this function, I'd probably use \ref modify.
     ///
     auto decrease_key(std::shared_ptr<heap_node_t> node) -> void
     {
@@ -323,6 +377,11 @@ public:
     }
 };
 
+///
+/// \brief Builds a pairing heap with provided elements.
+///
+/// Complexity: O(n)
+///
 template<typename Key>
 auto build_heap(pairing_heap<Key>& heap, std::vector<int> const& values) -> void
 {
