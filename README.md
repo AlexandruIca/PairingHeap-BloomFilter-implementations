@@ -1,6 +1,7 @@
 # Pairing Heap
 
-In [src/pairing\_heap.hpp](a) e implementata structura de date propriu-zisa cu
+In [src/pairing\_heap.hpp](https://github.com/AlexandruIca/SD_Tema2/blob/master/src/pairing_heap.hpp)
+e implementata structura de date propriu-zisa cu
 urmatoarele operatii:
 * Insert
 * Build
@@ -10,14 +11,17 @@ urmatoarele operatii:
 * Modify
 * O incercare de decrease-key
 
-In [src/main.cpp](a) am mici teste pentru structura de date implementata +
-implementarea programului ce ia ca input [formatul](a) dat ca tema.
+In [src/main.cpp](https://github.com/AlexandruIca/SD_Tema2/blob/master/src/main.cpp)
+am mici teste pentru structura de date implementata + implementarea programului
+ce ia ca input [formatul](https://github.com/AlexandruIca/SD_Tema2/blob/master/src/test.txt)
+dat ca tema.
 
 # Build
 
 ```sh
 mkdir build && cd build
 cmake ..
+cmake --build .
 ```
 
 # Demo
@@ -41,4 +45,4 @@ Pentru
 2 8
 ```
 
-![Couldn't load GIF :(](./media/SD2.gif)
+![Couldn't load GIF :(](./media/SDT2.gif)
