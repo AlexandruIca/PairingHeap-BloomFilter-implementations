@@ -72,7 +72,7 @@ auto basic_test() -> void
     // heap.traverse();
 }
 
-auto split(std::string const& str, std::string const& pattern)
+[[nodiscard]] auto split(std::string const& str, std::string const& pattern)
     -> std::vector<std::string>
 {
     std::vector<std::string> result{};
@@ -97,7 +97,8 @@ auto split(std::string const& str, std::string const& pattern)
     return result;
 }
 
-auto to_nums(std::vector<std::string> const& v) -> std::vector<int>
+[[nodiscard]] auto to_nums(std::vector<std::string> const& v)
+    -> std::vector<int>
 {
     std::vector<int> result{};
 
