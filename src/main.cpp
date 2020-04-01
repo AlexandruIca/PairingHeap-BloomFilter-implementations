@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -108,6 +109,19 @@ auto to_nums(std::vector<std::string> const& v) -> std::vector<int>
     return result;
 }
 
+auto print_n_times(int const times) -> std::string
+{
+    std::stringstream ss{};
+
+    if(times == 1) {
+        ss << " odata!";
+        return ss.str();
+    }
+
+    ss << " de " << times << " ori!";
+    return ss.str();
+}
+
 auto main(int, char*[]) noexcept -> int
 {
     basic_test();
@@ -143,7 +157,7 @@ auto main(int, char*[]) noexcept -> int
         }
         case 2: {
             int const times = heap.remove(nums[1]);
-            std::cout << "Am sters " << nums[1] << " de " << times << " ori!"
+            std::cout << "Am sters " << nums[1] << print_n_times(times)
                       << std::endl;
             break;
         }
@@ -152,7 +166,7 @@ auto main(int, char*[]) noexcept -> int
             break;
         }
         case 4: {
-            std::cout << "Am sters minimul de " << heap.delete_min() << " ori!"
+            std::cout << "Am sters minimul" << print_n_times(heap.delete_min())
                       << std::endl;
             break;
         }
