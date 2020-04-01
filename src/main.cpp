@@ -109,16 +109,17 @@ auto to_nums(std::vector<std::string> const& v) -> std::vector<int>
     return result;
 }
 
-auto print_n_times(int const times) -> std::string
+[[nodiscard]] auto print_n_times(int const times) -> std::string
 {
     std::stringstream ss{};
 
     if(times == 1) {
         ss << " odata!";
-        return ss.str();
+    }
+    else {
+        ss << " de " << times << " ori!";
     }
 
-    ss << " de " << times << " ori!";
     return ss.str();
 }
 
@@ -145,7 +146,7 @@ auto main(int, char*[]) noexcept -> int
         std::getline(f, line);
         auto const nums = to_nums(split(line, " "));
 
-        if(nums.size() <= 0) {
+        if(nums.empty()) {
             std::cout << "Input invalid la linia: " << i + 2 << std::endl;
             return EXIT_FAILURE;
         }
