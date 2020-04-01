@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "bloom_filter.hpp"
 #include "helper.hpp"
 #include "pairing_heap.hpp"
 
@@ -72,6 +73,24 @@ auto basic_test() -> void
     // heap.traverse();
 }
 
+auto bloom_filter_test() -> void
+{
+    sd::bloom_filter<std::string, 8> bf{};
+
+    bf.insert("voila");
+    bf.insert("ola");
+    bf.insert("cpp");
+
+    ASSERT(!bf.contains("cpcpp"));
+    ASSERT(!bf.contains("znnnn"));
+    ASSERT(!bf.contains("fpoai"));
+
+    // These might return true or false
+    bf.contains("voila");
+    bf.contains("ola");
+    bf.contains("cpp");
+}
+
 [[nodiscard]] auto split(std::string const& str, std::string const& pattern)
     -> std::vector<std::string>
 {
@@ -127,6 +146,7 @@ auto basic_test() -> void
 auto main(int, char*[]) noexcept -> int
 {
     basic_test();
+    bloom_filter_test();
 
     std::ifstream f{ "test.txt" };
 
