@@ -75,7 +75,7 @@ auto basic_test() -> void
 
 auto bloom_filter_test() -> void
 {
-    sd::bloom_filter<std::string, 8> bf{};
+    sd::bloom_filter<std::string> bf{};
 
     bf.insert("voila");
     bf.insert("ola");
@@ -86,9 +86,9 @@ auto bloom_filter_test() -> void
     ASSERT(!bf.contains("fpoai"));
 
     // These might return true or false
-    bf.contains("voila");
-    bf.contains("ola");
-    bf.contains("cpp");
+    ASSERT(bf.contains("voila"));
+    ASSERT(bf.contains("ola"));
+    ASSERT(bf.contains("cpp"));
 }
 
 [[nodiscard]] auto split(std::string const& str, std::string const& pattern)
