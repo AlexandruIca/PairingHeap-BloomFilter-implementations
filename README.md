@@ -12,9 +12,18 @@ urmatoarele operatii:
 * O incercare de decrease-key
 
 In [src/main.cpp](https://github.com/AlexandruIca/SD_Tema2/blob/master/src/main.cpp)
-am mici teste pentru structura de date implementata + implementarea programului
-ce ia ca input [formatul](https://github.com/AlexandruIca/SD_Tema2/blob/master/src/test.txt)
+am mici teste pentru structura de date implementata + teste pentru bloom filter +
+implementarea programului ce ia ca input [formatul](https://github.com/AlexandruIca/SD_Tema2/blob/master/src/test.txt)
 dat ca tema.
+
+In [src/main.cpp](https://github.com/AlexandruIca/SD_Tema2/blob/master/src/bloom_filter.hpp)
+am implementat un bloom filter cu operatiile de insert si contains. In loc sa
+folosesc double hashing am folosit un random number generator care ia ca seed
+valoarea hashului pentru o cheie pe care vreau sa o inserez/verific si generez
+numere random(index pentru biti) de atatea ori cate functii hash vreau. Asta
+ar trebui sa faca bloom filter-ul mai predictibil. Pentru a-l face si un pic
+mai rapid am implementat strategia si pe un bitset aliniat la marimea tipic a
+unui cache line(64 bytes).
 
 # Build
 
