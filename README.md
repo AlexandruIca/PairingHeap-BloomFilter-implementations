@@ -22,7 +22,7 @@ folosesc double hashing am folosit un random number generator care ia ca seed
 valoarea hashului pentru o cheie pe care vreau sa o inserez/verific si generez
 numere random(index pentru biti) de atatea ori cate functii hash vreau. Asta
 ar trebui sa faca bloom filter-ul mai predictibil. Pentru a-l face si un pic
-mai rapid am implementat strategia si pe un bitset aliniat la marimea tipic a
+mai rapid am implementat strategia si pe un bitset aliniat la marimea tipica a
 unui cache line(64 bytes).
 
 # Build
